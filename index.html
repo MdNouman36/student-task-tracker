@@ -763,12 +763,17 @@ async function addTask() {
 
     } catch (error) {
 
-        alert(
-            "Could not save task:\n\n" +
-            getErrorMessage(error)
-        );
+    console.error("ADD TASK ERROR:", error);
 
-    } finally {
+    alert(
+        "ADD TASK ERROR:\n\n" +
+        error.code +
+        "\n\n" +
+        error.message
+    );
+
+}
+ finally {
 
         addTaskBtn.disabled = false;
         addTaskBtn.textContent = "Add";
