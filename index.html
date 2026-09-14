@@ -723,67 +723,59 @@
         });
 
 
-        // Add task
-        addTaskBtn.addEventListener("click", addTask);
+       // Add a new task
+async function addTask() {
 
-        taskInput.addEventListener("keypress", (event) => {
+    const taskText = taskInput.value.trim();
 
-            if (event.key === "Enter") {
-                addTask();
+    if (taskText === "") {
+        alert("Please enter a task.");
+        return;
+    }
+
+    if (!currentUser) {
+        alert("Please login first.");
+        return;
+    }
+
+    addTaskBtn.disabled = true;
+    addTaskBtn.textContent = "Adding...";
+
+    try {
+
+        await addDoc(
+            collection(
+                db,
+                "users",
+                currentUser.uid,
+                "tasks"
+            ),
+            {
+                text: taskText,
+                completed: false,
+                createdAt: serverTimestamp()
             }
+        );
 
-        });
+        // Clear the input after successful saving
+        taskInput.value = "";
+        taskInput.focus();
 
+    } catch (error) {
 
-        async function addTask() {
+        alert(
+            "Could not save task:\n\n" +
+            getErrorMessage(error)
+        );
 
-            const taskText = taskInput.value.trim();
+    } finally {
 
-            if (taskText === "") {
-                alert("Please enter a task.");
-                return;
-            }
+        addTaskBtn.disabled = false;
+        addTaskBtn.textContent = "Add";
 
-            if (!currentUser) {
-                alert("Please login first.");
-                return;
-            }
+    }
 
-            addTaskBtn.disabled = true;
-
-            try {
-
-                await addDoc(
-                    collection(
-                        db,
-                        "users",
-                        currentUser.uid,
-                        "tasks"
-                    ),
-                    {
-                        text: taskText,
-                        completed: false,
-                        createdAt: serverTimestamp()
-                    }
-                );
-
-                taskInput.value = "";
-
-            } catch (error) {
-
-                alert(
-                    "Could not save task. Please check Firestore setup."
-                );
-
-            } finally {
-
-                addTaskBtn.disabled = false;
-
-            }
-
-        }
-
-
+}  
                  // Display tasks
         function displayTasks(snapshot) {
 
