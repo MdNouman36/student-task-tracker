@@ -784,7 +784,7 @@
         }
 
 
-        // Display tasks
+                 // Display tasks
         function displayTasks(snapshot) {
 
             taskList.innerHTML = "";
@@ -812,42 +812,71 @@
                 const span = document.createElement("span");
                 span.textContent = task.text;
 
+                // Click task to mark completed or pending
                 span.addEventListener("click", async () => {
 
-                    await updateDoc(
-                        doc(
-                            db,
-                            "users",
-                            currentUser.uid,
-                            "tasks",
-                            task.id
-                                      ),
-                        {
-                            completed: !task.completed
-                        }
-                    );
+                    try {
+
+                        await updateDoc(
+                            doc(
+                                db,
+                                "users",
+                                currentUser.uid,
+                                "tasks",
+                                task.id
+                            ),
+                            {
+                                completed: !task.completed
+                            }
+                        );
+
+                    } catch (error) {
+
+                        alert(
+                            "Unable to update task:\n\n" +
+                            getErrorMessage(error)
+                        );
+
+                    }
 
                 });
 
+                // Delete button
                 const deleteButton = document.createElement("button");
+
                 deleteButton.textContent = "Delete";
                 deleteButton.className = "delete-btn";
 
                 deleteButton.addEventListener("click", async () => {
 
-                    if (!confirm("Delete this task?")) {
+                    const confirmDelete = confirm(
+                        "Do you want to delete this task?"
+                    );
+
+                    if (!confirmDelete) {
                         return;
                     }
 
-                    await deleteDoc(
-                        doc(
-                            db,
-                            "users",
-                            currentUser.uid,
-                            "tasks",
-                            task.id
-                        )
-                    );
+                    try {
+
+                        await deleteDoc(
+                            doc(
+                                db,
+                                "users",
+                                currentUser.uid,
+                                "tasks",
+                                task.id
+                            )
+                        );
+
+                    } catch (error) {
+
+                        alert(
+                            "Unable to delete task:\n\n" +
+                            getErrorMessage(error)
+                        );
+
+                    }
 
                 });
 
@@ -858,19 +887,22 @@
 
             });
 
-            totalCount.textContent = currentTasks.length;
+            // Update statistics
+            const total = currentTasks.length;
 
             const completed = currentTasks.filter(
-                task => task.completed
+                (task) => task.completed === true
             ).length;
 
+            const pending = total - completed;
+
+            totalCount.textContent = total;
+            pendingCount.textContent = pending;
             completedCount.textContent = completed;
-            pendingCount.textContent =
-                currentTasks.length - completed;
 
             loadingMessage.classList.add("hidden");
 
-            if (currentTasks.length === 0) {
+            if (total === 0) {
                 emptyMessage.classList.remove("hidden");
             } else {
                 emptyMessage.classList.add("hidden");
@@ -879,35 +911,42 @@
         }
 
 
-        // Load tasks for logged-in user
+        // Listen for tasks of logged-in user
         function loadTasks() {
 
-            if (unsubscribeTasks) {
-                unsubscribeTasks();
+            if (!currentUser) {
+                return;
             }
 
-            const tasksRef = collection(
+            loadingMessage.classList.remove("hidden");
+
+            taskList.innerHTML = "";
+            emptyMessage.classList.add("hidden");
+
+            const tasksCollection = collection(
                 db,
                 "users",
                 currentUser.uid,
                 "tasks"
             );
 
-            const tasksQuery = query(
-                tasksRef,
-                orderBy("createdAt", "desc")
-            );
-
+            // Real-time listener
             unsubscribeTasks = onSnapshot(
-                tasksQuery,
+                tasksCollection,
                 (snapshot) => {
+
                     displayTasks(snapshot);
+
                 },
                 (error) => {
-                    console.error("Task loading error:", error);
 
-                    loadingMessage.textContent =
-                        "Unable to load tasks. Check Firestore rules.";
+                    loadingMessage.classList.add("hidden");
+
+                    alert(
+                        "Unable to load tasks:\n\n" +
+                        getErrorMessage(error)
+                    );
+
                 }
             );
 
@@ -922,48 +961,82 @@
             }
 
             const completedTasks = currentTasks.filter(
-                task => task.completed
+                (task) => task.completed === true
             );
 
-            for (const task of completedTasks) {
+            if (completedTasks.length === 0) {
 
-                await deleteDoc(
-                    doc(
-                        db,
-                        "users",
-                        currentUser.uid,
-                        "tasks",
-                        task.id
-                    )
+                alert("There are no completed tasks to clear.");
+                return;
+
+            }
+
+            const confirmClear = confirm(
+                "Delete all completed tasks?"
+            );
+
+            if (!confirmClear) {
+                return;
+            }
+
+            clearCompletedBtn.disabled = true;
+
+            try {
+
+                for (const task of completedTasks) {
+
+                    await deleteDoc(
+                        doc(
+                            db,
+                            "users",
+                            currentUser.uid,
+                            "tasks",
+                            task.id
+                        )
+                    );
+
+                }
+
+            } catch (error) {
+
+                alert(
+                    "Unable to clear completed tasks:\n\n" +
+                    getErrorMessage(error)
                 );
+
+            } finally {
+
+                clearCompletedBtn.disabled = false;
 
             }
 
         });
 
 
-        // Check login status
+        // Monitor login status
         onAuthStateChanged(auth, (user) => {
 
-            if (user) {
+            currentUser = user;
 
-                currentUser = user;
+            if (user) {
 
                 authSection.classList.add("hidden");
                 trackerSection.classList.remove("hidden");
 
                 userEmail.textContent = user.email;
 
-                loadingMessage.classList.remove("hidden");
-
                 loadTasks();
 
             } else {
 
-                currentUser = null;
-
                 authSection.classList.remove("hidden");
                 trackerSection.classList.add("hidden");
+
+                userEmail.textContent = "";
+
+                taskList.innerHTML = "";
+
+                currentTasks = [];
 
                 if (unsubscribeTasks) {
                     unsubscribeTasks();
