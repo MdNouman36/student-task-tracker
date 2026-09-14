@@ -821,4 +821,160 @@
                             currentUser.uid,
                             "tasks",
                             task.id
-              
+                                      ),
+                        {
+                            completed: !task.completed
+                        }
+                    );
+
+                });
+
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "Delete";
+                deleteButton.className = "delete-btn";
+
+                deleteButton.addEventListener("click", async () => {
+
+                    if (!confirm("Delete this task?")) {
+                        return;
+                    }
+
+                    await deleteDoc(
+                        doc(
+                            db,
+                            "users",
+                            currentUser.uid,
+                            "tasks",
+                            task.id
+                        )
+                    );
+
+                });
+
+                li.appendChild(span);
+                li.appendChild(deleteButton);
+
+                taskList.appendChild(li);
+
+            });
+
+            totalCount.textContent = currentTasks.length;
+
+            const completed = currentTasks.filter(
+                task => task.completed
+            ).length;
+
+            completedCount.textContent = completed;
+            pendingCount.textContent =
+                currentTasks.length - completed;
+
+            loadingMessage.classList.add("hidden");
+
+            if (currentTasks.length === 0) {
+                emptyMessage.classList.remove("hidden");
+            } else {
+                emptyMessage.classList.add("hidden");
+            }
+
+        }
+
+
+        // Load tasks for logged-in user
+        function loadTasks() {
+
+            if (unsubscribeTasks) {
+                unsubscribeTasks();
+            }
+
+            const tasksRef = collection(
+                db,
+                "users",
+                currentUser.uid,
+                "tasks"
+            );
+
+            const tasksQuery = query(
+                tasksRef,
+                orderBy("createdAt", "desc")
+            );
+
+            unsubscribeTasks = onSnapshot(
+                tasksQuery,
+                (snapshot) => {
+                    displayTasks(snapshot);
+                },
+                (error) => {
+                    console.error("Task loading error:", error);
+
+                    loadingMessage.textContent =
+                        "Unable to load tasks. Check Firestore rules.";
+                }
+            );
+
+        }
+
+
+        // Clear completed tasks
+        clearCompletedBtn.addEventListener("click", async () => {
+
+            if (!currentUser) {
+                return;
+            }
+
+            const completedTasks = currentTasks.filter(
+                task => task.completed
+            );
+
+            for (const task of completedTasks) {
+
+                await deleteDoc(
+                    doc(
+                        db,
+                        "users",
+                        currentUser.uid,
+                        "tasks",
+                        task.id
+                    )
+                );
+
+            }
+
+        });
+
+
+        // Check login status
+        onAuthStateChanged(auth, (user) => {
+
+            if (user) {
+
+                currentUser = user;
+
+                authSection.classList.add("hidden");
+                trackerSection.classList.remove("hidden");
+
+                userEmail.textContent = user.email;
+
+                loadingMessage.classList.remove("hidden");
+
+                loadTasks();
+
+            } else {
+
+                currentUser = null;
+
+                authSection.classList.remove("hidden");
+                trackerSection.classList.add("hidden");
+
+                if (unsubscribeTasks) {
+                    unsubscribeTasks();
+                    unsubscribeTasks = null;
+                }
+
+            }
+
+        });
+
+    </script>
+
+</body>
+</html>
