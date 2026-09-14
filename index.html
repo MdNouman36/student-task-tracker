@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Task Tracker</title>
+    <title>Student Task Tracker Pro</title>
 
     <style>
         * {
@@ -13,22 +13,134 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: #f4f6f8;
+            background: linear-gradient(135deg, #dbeafe, #f8fafc);
             color: #222;
+            min-height: 100vh;
         }
 
         .container {
-            max-width: 600px;
-            margin: 40px auto;
+            width: 92%;
+            max-width: 650px;
+            margin: 30px auto;
             padding: 25px;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
         }
 
         h1 {
             text-align: center;
             color: #2563eb;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 25px;
+        }
+
+        .auth-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .auth-box h2 {
+            text-align: center;
+            color: #1e293b;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #2563eb;
+        }
+
+        button {
+            border: none;
+            padding: 12px 16px;
+            border-radius: 9px;
+            cursor: pointer;
+            background: #2563eb;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .secondary-btn {
+            background: #64748b;
+        }
+
+        .secondary-btn:hover {
+            background: #475569;
+        }
+
+        .logout-btn {
+            background: #dc2626;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .logout-btn:hover {
+            background: #b91c1c;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .auth-buttons button {
+            flex: 1;
+        }
+
+        .switch-text {
+            text-align: center;
+            color: #64748b;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .switch-text:hover {
+            color: #2563eb;
+        }
+
+        .error-message {
+            color: #dc2626;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .success-message {
+            color: #16a34a;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .user-info {
+            background: #eff6ff;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            color: #1e40af;
+            font-size: 14px;
+            word-break: break-word;
         }
 
         .input-section {
@@ -37,56 +149,46 @@
             margin-bottom: 20px;
         }
 
-        input {
+        .input-section input {
             flex: 1;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 16px;
         }
 
-        button {
-            border: none;
-            padding: 12px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            background: #2563eb;
-            color: white;
-            font-size: 15px;
-        }
-
-        button:hover {
-            background: #1d4ed8;
+        .input-section button {
+            width: 80px;
         }
 
         ul {
             list-style: none;
             padding: 0;
+            margin: 0;
         }
 
         li {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 10px;
             padding: 12px;
             margin-bottom: 10px;
             background: #f1f5f9;
-            border-radius: 8px;
+            border-radius: 10px;
         }
 
         li.completed span {
             text-decoration: line-through;
-            color: gray;
+            color: #94a3b8;
         }
 
         li span {
             cursor: pointer;
             flex: 1;
+            overflow-wrap: anywhere;
         }
 
         .delete-btn {
             background: #dc2626;
             padding: 8px 10px;
+            font-size: 13px;
         }
 
         .delete-btn:hover {
@@ -97,6 +199,37 @@
             margin-top: 20px;
             text-align: center;
             font-weight: bold;
+            color: #334155;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #94a3b8;
+            padding: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            color: #64748b;
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                margin: 15px auto;
+                padding: 18px;
+            }
+
+            .input-section {
+                flex-direction: column;
+            }
+
+            .input-section button {
+                width: 100%;
+            }
+
+            .auth-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -104,31 +237,251 @@
 <body>
 
     <div class="container">
-        <h1>📚 Student Task Tracker</h1>
 
-        <div class="input-section">
-            <input
-                type="text"
-                id="taskInput"
-                placeholder="Enter your task..."
-            >
+        <h1>📚 Student Task Tracker Pro</h1>
+        <p class="subtitle">Manage your academic tasks anywhere, anytime</p>
 
-            <button onclick="addTask()">Add</button>
+        <!-- Authentication Section -->
+        <div id="authSection">
+
+            <div class="auth-box">
+                <h2 id="authTitle">Login</h2>
+
+                <input
+                    type="email"
+                    id="emailInput"
+                    placeholder="Enter your email"
+                >
+
+                <input
+                    type="password"
+                    id="passwordInput"
+                    placeholder="Enter your password"
+                >
+
+                <div class="auth-buttons">
+                    <button id="loginBtn">Login</button>
+                    <button id="signupBtn" class="secondary-btn">Sign Up</button>
+                </div>
+
+                <p id="authMessage" class="error-message"></p>
+
+                <p id="switchText" class="switch-text">
+                    New user? Click Sign Up to create an account.
+                </p>
+            </div>
+
         </div>
 
-        <ul id="taskList"></ul>
+        <!-- Task Tracker Section -->
+        <div id="trackerSection" class="hidden">
 
-        <div class="stats">
-            Total Tasks: <span id="taskCount">0</span>
+            <div class="user-info">
+                👤 Logged in as:
+                <strong id="userEmail"></strong>
+            </div>
+
+            <div class="input-section">
+                <input
+                    type="text"
+                    id="taskInput"
+                    placeholder="Enter your task..."
+                >
+
+                <button id="addTaskBtn">Add</button>
+            </div>
+
+            <p id="loadingMessage" class="loading">Loading your tasks...</p>
+
+            <ul id="taskList"></ul>
+
+            <p id="emptyMessage" class="empty-message hidden">
+                No tasks yet. Add your first task! 🎯
+            </p>
+
+            <div class="stats">
+                Total Tasks:
+                <span id="taskCount">0</span>
+            </div>
+
+            <button id="logoutBtn" class="logout-btn">
+                Logout
+            </button>
+
         </div>
+
     </div>
 
-    <script>
+
+    <!-- Firebase Code -->
+    <script type="module">
+
+        import { initializeApp } from
+        "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+
+        import {
+            getAuth,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            signOut,
+            onAuthStateChanged
+        } from
+        "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+            deleteDoc,
+            updateDoc,
+            doc,
+            onSnapshot,
+            query,
+            orderBy,
+            serverTimestamp
+        } from
+        "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDhhvQtj1V9elxYKBHWCuDMiBGgGRPnVHE",
+            authDomain: "student-task-tracker-f4d3d.firebaseapp.com",
+            projectId: "student-task-tracker-f4d3d",
+            storageBucket: "student-task-tracker-f4d3d.firebasestorage.app",
+            messagingSenderId: "717635642870",
+            appId: "1:717635642870:web:a4b6c28bdc4bd0415513d7",
+            measurementId: "G-31P43EK85Z"
+        };
+
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+
+        // HTML elements
+        const authSection = document.getElementById("authSection");
+        const trackerSection = document.getElementById("trackerSection");
+
+        const emailInput = document.getElementById("emailInput");
+        const passwordInput = document.getElementById("passwordInput");
+
+        const loginBtn = document.getElementById("loginBtn");
+        const signupBtn = document.getElementById("signupBtn");
+        const logoutBtn = document.getElementById("logoutBtn");
+
+        const authMessage = document.getElementById("authMessage");
+        const userEmail = document.getElementById("userEmail");
+
         const taskInput = document.getElementById("taskInput");
+        const addTaskBtn = document.getElementById("addTaskBtn");
         const taskList = document.getElementById("taskList");
         const taskCount = document.getElementById("taskCount");
 
-        function addTask() {
+        const loadingMessage = document.getElementById("loadingMessage");
+        const emptyMessage = document.getElementById("emptyMessage");
+
+
+        let currentUser = null;
+        let unsubscribeTasks = null;
+
+
+        // Show error or success message
+        function showMessage(message, type = "error") {
+            authMessage.textContent = message;
+            authMessage.className =
+                type === "success"
+                ? "success-message"
+                : "error-message";
+        }
+
+
+        // Sign up
+        signupBtn.addEventListener("click", async () => {
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (email === "" || password === "") {
+                showMessage("Please enter email and password.");
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage("Password must contain at least 6 characters.");
+                return;
+            }
+
+            try {
+                await createUserWithEmailAndPassword(
+                    auth,
+                    email,
+                    password
+                );
+
+                showMessage("Account created successfully!", "success");
+
+            } catch (error) {
+                showMessage(error.message);
+            }
+
+        });
+
+
+        // Login
+        loginBtn.addEventListener("click", async () => {
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (email === "" || password === "") {
+                showMessage("Please enter email and password.");
+                return;
+            }
+
+            try {
+                await signInWithEmailAndPassword(
+                    auth,
+                    email,
+                    password
+                );
+
+                showMessage("Login successful!", "success");
+
+            } catch (error) {
+                showMessage("Invalid email or password.");
+            }
+
+        });
+
+
+        // Logout
+        logoutBtn.addEventListener("click", async () => {
+
+            try {
+                await signOut(auth);
+
+            } catch (error) {
+                alert("Unable to logout. Please try again.");
+            }
+
+        });
+
+
+        // Add task
+        addTaskBtn.addEventListener("click", addTask);
+
+        taskInput.addEventListener("keypress", (event) => {
+            if (event.key === "Enter") {
+                addTask();
+            }
+        });
+
+
+        async function addTask() {
+
             const taskText = taskInput.value.trim();
 
             if (taskText === "") {
@@ -136,66 +489,160 @@
                 return;
             }
 
-            const li = document.createElement("li");
-
-            const span = document.createElement("span");
-            span.textContent = taskText;
-
-            span.onclick = function () {
-                li.classList.toggle("completed");
-            };
-
-            const deleteButton = document.createElement("button");
-            deleteButton.textContent = "Delete";
-            deleteButton.className = "delete-btn";
-
-            deleteButton.onclick = function () {
-                li.remove();
-                updateCount();
-            };
-
-            li.appendChild(span);
-            li.appendChild(deleteButton);
-
-            taskList.appendChild(li);
-
-            taskInput.value = "";
-            updateCount();
-        }
-
-        function updateCount() {
-            taskCount.textContent = taskList.children.length;
-        }
-
-        taskInput.addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                addTask();
+            if (!currentUser) {
+                alert("Please login first.");
+                return;
             }
+
+            try {
+
+                await addDoc(
+                    collection(db, "users", currentUser.uid, "tasks"),
+                    {
+                        text: taskText,
+                        completed: false,
+                        createdAt: serverTimestamp()
+                    }
+                );
+
+                taskInput.value = "";
+
+            } catch (error) {
+                alert("Could not save task. Please try again.");
+            }
+
+        }
+
+
+        // Display tasks
+        function displayTasks(snapshot) {
+
+            taskList.innerHTML = "";
+
+            let count = 0;
+
+            snapshot.forEach((taskDocument) => {
+
+                count++;
+
+                const task = taskDocument.data();
+                const taskId = taskDocument.id;
+
+                const li = document.createElement("li");
+
+                if (task.completed) {
+                    li.classList.add("completed");
+                }
+
+                const span = document.createElement("span");
+                span.textContent = task.text;
+
+                span.addEventListener("click", async () => {
+
+                    await updateDoc(
+                        doc(
+                            db,
+                            "users",
+                            currentUser.uid,
+                            "tasks",
+                            taskId
+                        ),
+                        {
+                            completed: !task.completed
+                        }
+                    );
+
+                });
+
+
+                const deleteButton = document.createElement("button");
+
+                deleteButton.textContent = "Delete";
+                deleteButton.className = "delete-btn";
+
+                deleteButton.addEventListener("click", async () => {
+
+                    await deleteDoc(
+                        doc(
+                            db,
+                            "users",
+                            currentUser.uid,
+                            "tasks",
+                            taskId
+                        )
+                    );
+
+                });
+
+
+                li.appendChild(span);
+                li.appendChild(deleteButton);
+
+                taskList.appendChild(li);
+
+            });
+
+            taskCount.textContent = count;
+
+            if (count === 0) {
+                emptyMessage.classList.remove("hidden");
+            } else {
+                emptyMessage.classList.add("hidden");
+            }
+
+            loadingMessage.classList.add("hidden");
+
+        }
+
+
+        // Detect login/logout
+        onAuthStateChanged(auth, (user) => {
+
+            currentUser = user;
+
+            if (user) {
+
+                authSection.classList.add("hidden");
+                trackerSection.classList.remove("hidden");
+
+                userEmail.textContent = user.email;
+
+                const tasksReference = collection(
+                    db,
+                    "users",
+                    user.uid,
+                    "tasks"
+                );
+
+                const tasksQuery = query(
+                    tasksReference,
+                    orderBy("createdAt", "desc")
+                );
+
+                unsubscribeTasks = onSnapshot(
+                    tasksQuery,
+                    displayTasks,
+                    (error) => {
+                        loadingMessage.textContent =
+                            "Unable to load tasks. Check Firestore rules.";
+                    }
+                );
+
+            } else {
+
+                authSection.classList.remove("hidden");
+                trackerSection.classList.add("hidden");
+
+                if (unsubscribeTasks) {
+                    unsubscribeTasks();
+                    unsubscribeTasks = null;
+                }
+
+            }
+
         });
+
     </script>
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyDhhvQtj1V9elxYKBHWCuDMiBGgGRPnVHE",
-    authDomain: "student-task-tracker-f4d3d.firebaseapp.com",
-    projectId: "student-task-tracker-f4d3d",
-    storageBucket: "student-task-tracker-f4d3d.firebasestorage.app",
-    messagingSenderId: "717635642870",
-    appId: "1:717635642870:web:a4b6c28bdc4bd0415513d7",
-    measurementId: "G-31P43EK85Z"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
 
 </body>
 </html>
